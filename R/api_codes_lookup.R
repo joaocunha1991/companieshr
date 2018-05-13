@@ -12,7 +12,6 @@ api_codes_lookup = function(){
                      API_Response = c("OK", "Not Modified", "Bad Request", "Unauthorized", "Forbidden" , "Not Found" , "Not Acceptable" , "Gone" , "Enhance Your Calm", "Unprocessable Entity", "Too Many Requests", "Internal Server Error", "Bad Gateway", "Service Unavailable", "Gateway timeout")
                      )
 
-
-}
+  }
 
 
