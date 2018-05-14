@@ -16,12 +16,12 @@ companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3)
 \value{
 A list with two elements:
 \itemize{
- \item{\strong{results_df}} {A data-frame with the results returned from the 'companies/ end point of the CompaniesHouse API. The results can be explored via \href{https://developer.companieshouse.gov.uk/api/docs/company/company_number/companyProfile-resource.html}{this link}.}
+ \item{\strong{results_df}} {A data-frame with the results returned from the 'companies/' end point of the CompaniesHouse API. The results can be explored via \href{https://developer.companieshouse.gov.uk/api/docs/company/company_number/companyProfile-resource.html}{this link}.}
  \item{\strong{errorLogs}}  {In case some CompanyNumbers failed to return values either because of errors or because there was no results to be returned, these can be explored via errorLogs.}
 }
 }
 \description{
-This function is a wrapper for the Charges API from Companies House. Allows the user to collect Charges data by parsing a company number.
+This function is a wrapper for the Company Profile API end-point from Companies House. Allows the user to collect company profile data by parsing a CompanyNumbers and returning a tabular data-frame as response.
 }
 \details{
 All Companies House APIs are accessed by company number. The user can collect company numbers from monthly extracts offered by CompanyHouse that can be accessed \href{http://download.companieshouse.gov.uk/en_output.html}{here}.

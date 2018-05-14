@@ -2,7 +2,7 @@
 
 #' Companies House - companies_profile_collect
 #'
-#' This function is a wrapper for the Charges API from Companies House. Allows the user to collect Charges data by parsing a company number.
+#' This function is a wrapper for the Company Profile API end-point from Companies House. Allows the user to collect company profile data by parsing a CompanyNumbers and returning a tabular data-frame as response.
 #'
 #' All Companies House APIs are accessed by company number. The user can collect company numbers from monthly extracts offered by CompanyHouse that can be accessed \href{http://download.companieshouse.gov.uk/en_output.html}{here}.
 #'
@@ -12,7 +12,7 @@
 #'
 #' @return A list with two elements:
 #' \itemize{
-#'  \item{\strong{results_df}} {A data-frame with the results returned from the 'companies/ end point of the CompaniesHouse API. The results can be explored via \href{https://developer.companieshouse.gov.uk/api/docs/company/company_number/companyProfile-resource.html}{this link}.}
+#'  \item{\strong{results_df}} {A data-frame with the results returned from the 'companies/' end point of the CompaniesHouse API. The results can be explored via \href{https://developer.companieshouse.gov.uk/api/docs/company/company_number/companyProfile-resource.html}{this link}.}
 #'  \item{\strong{errorLogs}}  {In case some CompanyNumbers failed to return values either because of errors or because there was no results to be returned, these can be explored via errorLogs.}
 #' }
 #'
@@ -24,7 +24,7 @@
 #'}
 
 
-companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 3){
+companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 3, items_per_page = 1000 ){
 
   url_f = "https://api.companieshouse.gov.uk"
   final_df = list()
@@ -43,7 +43,7 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
       i = i + 1
       next()}
 
-    path_f = sprintf("/company/%s/?items_per_page=100000", companies_df$CompanyNumber[i])
+    path_f = sprintf("/company/%s/?items_per_page=%s", companies_df$CompanyNumber[i], items_per_page)
     results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
 
     #print(results_all$headers$`x-ratelimit-remain`)
@@ -58,7 +58,7 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
       final_df[[i]] = companies_df %>%
         dplyr::inner_join(df_response, by = "CompanyNumber")
 
-      cat(paste0(nrow(final_df[[i]]), " Company Profile Information for CompanyNumber  ", companies_df$CompanyNumber[i], " were colected successfully \n"))
+      cat(paste0(nrow(df_response), " Company Profile Information record for CompanyNumber  ", companies_df$CompanyNumber[i], " was/were colected successfully \n"))
 
       i = i + 1
       next()
