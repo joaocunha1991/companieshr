@@ -9,6 +9,8 @@
 #' @param companies_df A data-frame with CompanyNumber column (see companies data file as example).
 #' @param auth_api_key The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.
 #' @param time_to_rest In case the API repsonse is 429 ('Too Many Requests') the user can select the period to wait until it tries again. It defaults to 3 seconds.
+#' @param items_per_page The items per page request to try and return (defaults to 1000).
+#' @param join A boolean value that when TRUE whill return the results joined with the original df parsed. Defaults to TRUE.
 #'
 #' @return A list with two elements:
 #' \itemize{
@@ -24,7 +26,7 @@
 #'}
 
 
-companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 3, items_per_page = 1000 ){
+companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE ){
 
   url_f = "https://api.companieshouse.gov.uk"
   final_df = list()
@@ -40,6 +42,8 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
     if(i > nrow(companies_df)){break()}
 
     if(is.na(companies_df$CompanyNumber[i])){
+
+      final_df[[i]] = companies_df[i,]
       i = i + 1
       next()}
 
@@ -53,10 +57,18 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
       results_content = rawToChar(results_all$content)
 
       df_response = fromJSONtoDF_companies_base(jsonlite::fromJSON(results_content)) %>%
-                      dplyr::rename(CompanyNumber = company_number)
+                      dplyr::rename(CompanyNumber = company_number,
+                                    CompanyName = company_name)
 
-      final_df[[i]] = companies_df %>%
-        dplyr::inner_join(df_response, by = "CompanyNumber")
+      if(join){
+        final_df[[i]] = companies_df %>%
+          dplyr::select(-CompanyName) %>%
+          dplyr::inner_join(df_response, by = "CompanyNumber")
+
+      }else{
+        final_df[[i]] = df_response %>%
+          select(CompanyNumber, CompanyName, dplyr::everything())
+        }
 
       cat(paste0(nrow(df_response), " Company Profile Information record for CompanyNumber  ", companies_df$CompanyNumber[i], " was/were colected successfully \n"))
 
@@ -71,7 +83,9 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
 
     }else{
 
-      print(paste0("An error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_df$CompanyNumber[i], "."))
+      cat(paste0("\nAn error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_df$CompanyNumber[i], ".\n"))
+
+      final_df[[i]] = companies_df[i,]
 
       error_log = data.frame(ResponseCode = results_all$status_code,
                              CompanyNumber = companies_df$CompanyNumber[i],

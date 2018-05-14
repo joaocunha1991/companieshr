@@ -4,7 +4,8 @@
 \alias{companies_profile_collect}
 \title{Companies House - companies_profile_collect}
 \usage{
-companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3)
+companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3,
+  items_per_page = 1000, join = TRUE)
 }
 \arguments{
 \item{companies_df}{A data-frame with CompanyNumber column (see companies data file as example).}
@@ -12,6 +13,10 @@ companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3)
 \item{auth_api_key}{The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.}
 
 \item{time_to_rest}{In case the API repsonse is 429 ('Too Many Requests') the user can select the period to wait until it tries again. It defaults to 3 seconds.}
+
+\item{items_per_page}{The items per page request to try and return (defaults to 1000).}
+
+\item{join}{A boolean value that when TRUE whill return the results joined with the original df parsed. Defaults to TRUE.}
 }
 \value{
 A list with two elements:
