@@ -23,9 +23,9 @@ fromJSONtoDF_companies_base = function(json_list){
   df_original = t(unlist(json_list, recursive = TRUE)) %>% data.frame(stringsAsFactors = FALSE)
 
   df_final = df_original %>%
-    dplyr::select(-contains("sic_code"), -contains("previous_company_names")) %>%
-    dplyr::mutate(SIC_Codes = paste(t(dplyr::select(df_original, contains("sic_code"))), collapse =', '),
-           Previous_Company_Names = paste(t(dplyr::select(df_original, contains("previous_company_names.name"))), collapse =', '))
+    dplyr::select(-dplyr::contains("sic_code"), -dplyr::contains("previous_company_names")) %>%
+    dplyr::mutate(SIC_Codes = paste(t(dplyr::select(df_original, dplyr::contains("sic_code"))), collapse =', '),
+           Previous_Company_Names = paste(t(dplyr::select(df_original, dplyr::contains("previous_company_names.name"))), collapse =', '))
 
   return(df_final)
 

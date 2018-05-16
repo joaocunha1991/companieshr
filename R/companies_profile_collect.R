@@ -33,21 +33,19 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
   errorLogs = list()
   auth_keys = auth_api_key
 
+  if("data.frame" %in% class(companies_df)){
+      companies_numbers = unique(companies_df$CompanyNumber)[!is.na(unique(companies_df$CompanyNumber))]
+  }else if(class(companies_df) %in% c("character", "numeric")){companies_numbers = as.character(unique(companies_df[!is.na(companies_df)]))}
+
   API_responses = api_codes_lookup()
 
   i = 1
 
   while(TRUE){
 
-    if(i > nrow(companies_df)){break()}
+    if(i > length(companies_numbers)){break()}
 
-    if(is.na(companies_df$CompanyNumber[i])){
-
-      final_df[[i]] = companies_df[i,]
-      i = i + 1
-      next()}
-
-    path_f = sprintf("/company/%s/?items_per_page=%s", companies_df$CompanyNumber[i], items_per_page)
+    path_f = sprintf("/company/%s/?items_per_page=%s", companies_numbers[i], items_per_page)
     results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
 
     #print(results_all$headers$`x-ratelimit-remain`)
@@ -56,21 +54,12 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
 
       results_content = rawToChar(results_all$content)
 
-      df_response = fromJSONtoDF_companies_base(jsonlite::fromJSON(results_content)) %>%
+      final_df[[i]] = fromJSONtoDF_companies_base(jsonlite::fromJSON(results_content)) %>%
                       dplyr::rename(CompanyNumber = company_number,
-                                    CompanyName = company_name)
+                                    CompanyName = company_name) %>%
+                      dplyr::select(CompanyNumber, CompanyName, dplyr::everything())
 
-      if(join){
-        final_df[[i]] = companies_df %>%
-          dplyr::select(-CompanyName) %>%
-          dplyr::inner_join(df_response, by = "CompanyNumber")
-
-      }else{
-        final_df[[i]] = df_response %>%
-          select(CompanyNumber, CompanyName, dplyr::everything())
-        }
-
-      cat(paste0(nrow(df_response), " Company Profile Information record for CompanyNumber  ", companies_df$CompanyNumber[i], " was/were colected successfully \n"))
+      cat(paste0(nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))
 
       i = i + 1
       next()
@@ -83,12 +72,11 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
 
     }else{
 
-      cat(paste0("\nAn error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_df$CompanyNumber[i], ".\n"))
+      cat(paste0("\nAn error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_numbers[i], ".\n"))
 
-      final_df[[i]] = companies_df[i,]
 
       error_log = data.frame(ResponseCode = results_all$status_code,
-                             CompanyNumber = companies_df$CompanyNumber[i],
+                             CompanyNumber = companies_numbers[i],
                              Error_Time = Sys.time())
 
       errorLogs[[i]] = error_log %>%
@@ -101,10 +89,22 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
 
   }
 
-  final_results = list(results_df = final_df %>% dplyr::bind_rows(),
+  #formatting the final results:
+  if(join & ("data.frame" %in% class(companies_df))){
+
+    final_results_df = companies_df %>%
+      dplyr::inner_join(dplyr::bind_rows(final_df), by = "CompanyNumber")
+
+  }else{
+
+    final_results_df = final_df %>% dplyr::bind_rows()
+  }
+
+
+  final_results = list(results_df = final_results_df,
                        errorLogs = errorLogs %>% dplyr::bind_rows())
 
-  cat(paste0("\nA total of ", nrow(final_results$results_df), " records were collected for ", length(unique(final_results$results_df$CompanyNumber)), " companies. These results are stored on 'results_df' data-frame. \nThere are ", nrow(final_results$errorLogs), " companies that produced errors or didn't return information and therefore no information was collected. The details on these errors can be found on 'errorLogs'."))
+  cat(paste0("\nA total of ", nrow(final_results$results_df), " rows were returned for ", length(unique(final_results$results_df$CompanyNumber)), " companies. These results are stored on 'results_df' data-frame. \nThere are ", nrow(final_results$errorLogs), " companies that produced errors or didn't return information and therefore no information was collected. The details on these errors can be found on 'errorLogs'."))
   return(final_results)
 
 }
