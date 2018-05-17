@@ -25,6 +25,9 @@
 #' companies_api_collect(companies_df, auth_api_key , time_to_rest = 3)
 #'}
 
+#To write:
+
+#A general errorHandling function to be called in all the API endpoint wrappers (argument controls)
 
 companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE ){
 
@@ -48,6 +51,7 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
     path_f = sprintf("/company/%s/?items_per_page=%s", companies_numbers[i], items_per_page)
     results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
 
+    if(httr::http_type(results_all) != "application/json"){stop("API did not return json", call. = FALSE)}
     #print(results_all$headers$`x-ratelimit-remain`)
 
     if(results_all$status_code == 200){
@@ -93,7 +97,7 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
   if(join & ("data.frame" %in% class(companies_df))){
 
     final_results_df = companies_df %>%
-      dplyr::inner_join(dplyr::bind_rows(final_df), by = "CompanyNumber")
+      dplyr::left_join(dplyr::bind_rows(final_df), by = "CompanyNumber")
 
   }else{
 
