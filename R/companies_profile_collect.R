@@ -51,9 +51,9 @@ companies_profile_collect = function(companies_df, auth_api_key, time_to_rest = 
     path_f = sprintf("/company/%s/?items_per_page=%s", companies_numbers[i], items_per_page)
     results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
 
-    if(httr::http_type(results_all) != "application/json"){stop("API did not return json", call. = FALSE)}
-    #print(results_all$headers$`x-ratelimit-remain`)
+    if(i == 1){cat("Current Limit: ", results_all$headers$`x-ratelimit-remain`, " requests\n")}
 
+    # if(httr::http_type(results_all) != "application/json"){next("API did not return json", call. = FALSE)}
     if(results_all$status_code == 200){
 
       results_content = rawToChar(results_all$content)
