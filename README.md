@@ -1,3 +1,3 @@
-The package is under development. Currently only access to the "https://api.companieshouse.gov.uk/company" API end-point.
+The package is under development. Currently only access to the https://api.companieshouse.gov.uk/company API end-point.
 
 More details to come soon ...
