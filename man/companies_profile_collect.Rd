@@ -4,11 +4,11 @@
 \alias{companies_profile_collect}
 \title{Companies House - companies_profile_collect}
 \usage{
-companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3,
-  items_per_page = 1000, join = TRUE)
+companies_profile_collect(companies, auth_api_key, time_to_rest = 3,
+  items_per_page = 1000, join = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{companies_df}{A data-frame with CompanyNumber column (see companies data file as example).}
+\item{companies}{A data-frame with CompanyNumber column (see companies data file as example) or a character vector with CompanyNumber.}
 
 \item{auth_api_key}{The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.}
 
@@ -16,7 +16,9 @@ companies_profile_collect(companies_df, auth_api_key, time_to_rest = 3,
 
 \item{items_per_page}{The items per page request to try and return (defaults to 1000).}
 
-\item{join}{A boolean value that when TRUE whill return the results joined with the original df parsed. Defaults to TRUE.}
+\item{join}{A boolean value that when TRUE whill return the results joined with the original df parsed. It only applies when companies argument is a data.frame. Defaults to TRUE.}
+
+\item{verbose}{Boolean value set to TRUE to print the status of each API call.}
 }
 \value{
 A list with two elements:
@@ -33,6 +35,6 @@ All Companies House APIs are accessed by company number. The user can collect co
 }
 \examples{
 \dontrun{
-companies_api_collect(companies_df, auth_api_key , time_to_rest = 3)
+companies_api_collect(companies, auth_api_key , time_to_rest = 3)
 }
 }
