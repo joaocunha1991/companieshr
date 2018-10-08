@@ -1,4 +1,4 @@
 #exportPattern("^[[:alpha:]]+")
 
-export(companies_profile_collect)
+export(companies_house_collect)
 import(magrittr)

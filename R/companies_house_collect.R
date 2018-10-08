@@ -1,12 +1,13 @@
 
 
-#' Companies House - companies_profile_collect
+#' Companies House - companies_house_collect
 #'
 #' This function is a wrapper for the Company Profile API end-point from Companies House. Allows the user to collect company profile data by parsing a CompanyNumbers and returning a tabular data-frame as response.
 #'
 #' All Companies House APIs are accessed by company number. The user can collect company numbers from monthly extracts offered by CompanyHouse that can be accessed \href{http://download.companieshouse.gov.uk/en_output.html}{here}.
 #'
 #' @param companies A data-frame with CompanyNumber column (see companies data file as example) or a character vector with CompanyNumber.
+#' @param api_end_point A character value describing which end-point to call.
 #' @param auth_api_key The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.
 #' @param time_to_rest In case the API repsonse is 429 ('Too Many Requests') the user can select the period to wait until it tries again. It defaults to 3 seconds.
 #' @param items_per_page The items per page request to try and return (defaults to 1000).
@@ -23,19 +24,22 @@
 #'
 #' @examples
 #' \dontrun{
-#' companies_api_collect(companies, auth_api_key , time_to_rest = 3)
+#' companies_house_collect(companies, auth_api_key , time_to_rest = 3)
 #'}
 
 #To write:
 
 #A general errorHandling function to be called in all the API endpoint wrappers (argument controls)
 
-companies_profile_collect = function(companies, auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE, verbose = TRUE){
+companies_house_collect = function(companies, api_end_point = "company_profile", auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE, verbose = TRUE){
+
+  browser()
 
   url_f = "https://api.companieshouse.gov.uk"
   final_df = list()
   errorLogs = list()
   auth_keys = auth_api_key
+  api_call_types_df = api_end_point_map_df()
 
   if("data.frame" %in% class(companies)){
       companies_numbers = unique(companies$CompanyNumber)[!is.na(unique(companies$CompanyNumber))]
@@ -50,7 +54,7 @@ companies_profile_collect = function(companies, auth_api_key, time_to_rest = 3, 
 
     if(i > length(companies_numbers)){break()}
 
-    path_f = sprintf("/company/%s/?items_per_page=%s", companies_numbers[i], items_per_page)
+    path_f = sprintf(api_call_types_df$end_point[api_call_types_df$api_end_point_type == api_end_point], companies_numbers[i], items_per_page)
     results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
 
     if(i == 1){cat(paste0("Collecting Companies House Data (Current API Limit: ", results_all$headers$`x-ratelimit-remain`, " requests)...\n"))}
