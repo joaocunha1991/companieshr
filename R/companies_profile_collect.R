@@ -45,6 +45,7 @@ companies_profile_collect = function(companies, auth_api_key, time_to_rest = 3, 
 
   i = 1
 
+  #infinite loop:
   while(TRUE){
 
     if(i > length(companies_numbers)){break()}
