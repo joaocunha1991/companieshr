@@ -11,7 +11,7 @@ companies_house_collect(companies, api_end_point = "company_profile",
 \arguments{
 \item{companies}{A data-frame with CompanyNumber column (see companies data file as example) or a character vector with CompanyNumber.}
 
-\item{api_end_point}{A character value describing which end-point to call.}
+\item{api_end_point}{A character value describing which end-point to call. Can be 'company_profile', 'persons_significant_control', 'officers' or 'charges'. Defaults to 'company_profile'.}
 
 \item{auth_api_key}{The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.}
 

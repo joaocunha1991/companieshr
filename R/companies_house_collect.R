@@ -7,7 +7,7 @@
 #' All Companies House APIs are accessed by company number. The user can collect company numbers from monthly extracts offered by CompanyHouse that can be accessed \href{http://download.companieshouse.gov.uk/en_output.html}{here}.
 #'
 #' @param companies A data-frame with CompanyNumber column (see companies data file as example) or a character vector with CompanyNumber.
-#' @param api_end_point A character value describing which end-point to call.
+#' @param api_end_point A character value describing which end-point to call. Can be 'company_profile', 'persons_significant_control', 'officers' or 'charges'. Defaults to 'company_profile'.
 #' @param auth_api_key The CompaniesHouse API Key. To generate one please go to \href{https://developer.companieshouse.gov.uk/api/docs/index/gettingStarted/apikey_authorisation.html}{CompaniesHouse Developers Page}.
 #' @param time_to_rest In case the API repsonse is 429 ('Too Many Requests') the user can select the period to wait until it tries again. It defaults to 3 seconds.
 #' @param items_per_page The items per page request to try and return (defaults to 1000).
@@ -33,7 +33,10 @@
 
 companies_house_collect = function(companies, api_end_point = "company_profile", auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE, verbose = TRUE){
 
-  browser()
+
+  if(!api_end_point %in% c("company_profile", "persons_significant_control", "officers", "charges")){
+    stop("api_end_point must be either 'company_profile', 'persons_significant_control', 'officers', 'charges'")
+  }
 
   url_f = "https://api.companieshouse.gov.uk"
   final_df = list()
@@ -64,10 +67,7 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
       results_content = rawToChar(results_all$content)
 
-      final_df[[i]] = fromJSONtoDF_companies_base(jsonlite::fromJSON(results_content)) %>%
-                      dplyr::rename(CompanyNumber = company_number,
-                                    CompanyName = company_name) %>%
-                      dplyr::select(CompanyNumber, CompanyName, dplyr::everything())
+      final_df[[i]] = fromJSONtoDF(jsonlite::fromJSON(results_content), api_end_point = api_end_point, company_number = companies_numbers[i])
 
       if(verbose){cat(paste0(nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))}
 
