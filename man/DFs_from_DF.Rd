@@ -10,7 +10,7 @@ DFs_from_DF(json_list)
 \item{json_list}{A json items api response.}
 }
 \value{
-A  dataframe with simplified response.
+A dataframe with simplified response.
 }
 \description{
 This function simplifies items returns that include DataFrames and lists as columns.

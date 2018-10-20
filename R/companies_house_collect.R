@@ -27,9 +27,6 @@
 #' companies_house_collect(companies, auth_api_key , time_to_rest = 3)
 #'}
 
-#To write:
-
-#A general errorHandling function to be called in all the API endpoint wrappers (argument controls)
 
 companies_house_collect = function(companies, api_end_point = "company_profile", auth_api_key, time_to_rest = 3, items_per_page = 1000, join = TRUE, verbose = TRUE){
 
