@@ -28,12 +28,12 @@ fromJSONtoDF = function(json_list, api_end_point, company_number){
     df_final = DFs_from_DF(json_list = json_list) %>%
       dplyr::mutate(SIC_Codes = paste(t(dplyr::select(df_original, dplyr::contains("sic_code"))), collapse =', '),
                     Previous_Company_Names = paste(t(dplyr::select(df_original, dplyr::contains("previous_company_names.name"))), collapse =', ')) %>%
-      dplyr::select(-dplyr::contains("sic_code", ignore.case = FALSE), -dplyr::contains("previous_company_names", ignore.case = FALSE)) %>%
+      dplyr::select( -dplyr::contains("previous_company_names", ignore.case = FALSE)) %>%
       dplyr::rename(CompanyNumber = company_number,
                     CompanyName = company_name) %>%
      dplyr::select(CompanyNumber, CompanyName, dplyr::everything())
 
-
+#-dplyr::contains("sic_code", ignore.case = FALSE),
   }else if(api_end_point == "persons_significant_control"){
 
     df_final = DFs_from_DF(json_list = json_list) %>%

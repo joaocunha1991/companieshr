@@ -98,10 +98,10 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
   }
 
   #formatting the final results:
-  if(join & ("data.frame" %in% class(companies))){
+  if(join && ("data.frame" %in% class(companies)) && nrow(dplyr::bind_rows(final_df)) >0 ){
 
     final_results_df = companies %>%
-      dplyr::left_join(dplyr::bind_rows(final_df), by = "CompanyNumber")
+      dplyr::left_join(dplyr::select(dplyr::bind_rows(final_df), -dplyr::contains("CompanyName")), by = "CompanyNumber")
 
   }else{
 
@@ -112,7 +112,7 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
   final_results = list(results_df = final_results_df,
                        errorLogs = errorLogs %>% dplyr::bind_rows())
 
-  cat(paste0("\nA total of ", nrow(final_results$results_df), " rows were returned for ", length(unique(final_results$results_df$CompanyNumber)), " companies. These results are stored on 'results_df' data-frame. \nThere are ", nrow(final_results$errorLogs), " companies that produced errors or didn't return information and therefore no information was collected. The details on these errors can be found on 'errorLogs'."))
+  cat(paste0("\nA total of ", nrow(final_results$results_df), " rows were returned for ", suppressWarnings(length(unique(final_results$results_df$CompanyNumber))), " companies. These results are stored on 'results_df' data-frame. \nThere are ", nrow(final_results$errorLogs), " companies that produced errors or didn't return information and therefore no information was collected. The details on these errors can be found on 'errorLogs'."))
   return(final_results)
 
 }
