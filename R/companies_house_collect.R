@@ -21,6 +21,7 @@
 #' }
 #'
 #' @import magrittr
+#' @export
 #'
 #' @examples
 #' \dontrun{
