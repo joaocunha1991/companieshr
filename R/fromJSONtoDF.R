@@ -43,8 +43,7 @@ fromJSONtoDF = function(json_list, api_end_point, company_number){
   }else if(api_end_point == "officers"){
 
     df_final = DFs_from_DF(json_list = json_list) %>%
-      dplyr::mutate(CompanyNumber = company_number,
-                    items.natures_of_control = sapply(items.natures_of_control, function(x){paste(x, collapse = " & ")})) %>%
+      dplyr::mutate(CompanyNumber = company_number) %>%
       dplyr::select(CompanyNumber, dplyr::everything())
 
   }else if(api_end_point == "charges"){
@@ -54,9 +53,9 @@ fromJSONtoDF = function(json_list, api_end_point, company_number){
                     items.persons_entitled = sapply(items.persons_entitled, function(x){paste(x$name, collapse = " & ")})) %>%
       dplyr::select(CompanyNumber, dplyr::everything())
 
-  return(df_final)
-
   }
+
+  return(df_final)
 }
 
 
