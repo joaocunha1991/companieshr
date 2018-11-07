@@ -85,7 +85,8 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
       error_log = data.frame(ResponseCode = results_all$status_code,
                              CompanyNumber = companies_numbers[i],
-                             Error_Time = Sys.time())
+                             Error_Time = Sys.time(),
+                             stringsAsFactors = FALSE)
 
       errorLogs[[i]] = error_log %>%
         dplyr::inner_join(API_responses, by = c("ResponseCode" = "Code")) %>%
@@ -98,7 +99,8 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
   }
 
   #formatting the final results:
-  if(join && ("data.frame" %in% class(companies)) && nrow(dplyr::bind_rows(final_df)) >0 ){
+
+  if(join && ("data.frame" %in% class(companies)) && nrow(dplyr::bind_rows(final_df)) > 0 ){
 
     final_results_df = companies %>%
       dplyr::left_join(dplyr::select(dplyr::bind_rows(final_df), -dplyr::contains("CompanyName")), by = "CompanyNumber")
