@@ -39,8 +39,15 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
   url_f = "https://api.companieshouse.gov.uk"
   final_df = list()
   errorLogs = list()
-  auth_keys = auth_api_key
   api_call_types_df = api_end_point_map_df()
+  if(!('list' %in% class(auth_api_key))){
+    auth_keys_list = list(auth_api_key)
+  }else{
+    auth_keys_list = auth_api_key
+  }
+
+  total_keys = length(auth_keys_list)
+
 
   if("data.frame" %in% class(companies)){
       companies_numbers = unique(companies$CompanyNumber)[!is.na(unique(companies$CompanyNumber))]
@@ -48,6 +55,7 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
   API_responses = api_codes_lookup()
 
+  current_key_position = 1
   i = 1
 
   #infinite loop:
@@ -56,7 +64,7 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
     if(i > length(companies_numbers)){break()}
 
     path_f = sprintf(api_call_types_df$end_point[api_call_types_df$api_end_point_type == api_end_point], companies_numbers[i], items_per_page)
-    results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys))
+    results_all <- httr::GET(url = url_f, path = path_f, httr::add_headers(Host = "api.companieshouse.gov.uk", Authorization = auth_keys_list[[current_key_position]]))
 
     if(i == 1){cat(paste0("Collecting Companies House Data (Current API Limit: ", results_all$headers$`x-ratelimit-remain`, " requests)...\n"))}
 
@@ -67,15 +75,23 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
       final_df[[i]] = fromJSONtoDF(jsonlite::fromJSON(results_content), api_end_point = api_end_point, company_number = companies_numbers[i])
 
-      if(verbose){cat(paste0(nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))}
+      if(verbose){cat(paste0(i," - ", nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))}
 
       i = i + 1
       next()
 
     }else if(results_all$status_code == 429){
 
-      Sys.sleep(time_to_rest)
-      if(verbose){cat(paste0("\nToo many requests. ", time_to_rest, " seconds until next try ...\n"))}
+      if(current_key_position < total_keys){
+        current_key_position = current_key_position + 1
+        if(verbose){cat(paste0("\nSwitching API keys to key ", current_key_position, "...\n"))}
+        Sys.sleep(time_to_rest)
+      }else{
+        current_key_position = 1
+        if(verbose){cat(paste0("\nSwitching API keys to key ", current_key_position, "...\n"))}
+        Sys.sleep(time_to_rest)
+        if(verbose){cat(paste0("\nToo many requests. ", time_to_rest, " seconds until next try ...\n"))}
+      }
       next()
 
     }else{
