@@ -96,7 +96,7 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
     }else{
 
-      if(verbose){cat(paste0("\nAn error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_numbers[i], ".\n"))}
+      if(verbose){cat(paste0(i," - ", "An error occured with an API Response code: ", results_all$status_code, ". Skipping CompanyID ", companies_numbers[i], ".\n"))}
 
 
       error_log = data.frame(ResponseCode = results_all$status_code,
