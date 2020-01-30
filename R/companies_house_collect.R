@@ -73,14 +73,28 @@ companies_house_collect = function(companies, api_end_point = "company_profile",
 
       results_content = rawToChar(results_all$content)
 
-      final_df[[i]] = fromJSONtoDF(jsonlite::fromJSON(results_content), api_end_point = api_end_point, company_number = companies_numbers[i])
+      tryCatch(
+        expr = {
+          final_df[[i]] = fromJSONtoDF(jsonlite::fromJSON(results_content), api_end_point = api_end_point, company_number = companies_numbers[i])
+          if(verbose){cat(paste0(i," - ", nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))}
 
-      if(verbose){cat(paste0(i," - ", nrow(final_df[[i]]), " Company Profile Information record for CompanyNumber  ", companies_numbers[i], " was/were colected successfully \n"))}
+        },
+        error = function(e){
+          cat(paste0(i," - ", "Data-processing error: ", e, companies_numbers[i], ".\n"))
+
+          errorLogs[[i]] = data.frame(ResponseCode = 999,
+                                 API_Response = "data-processing error due to api not returning a particular field",
+                                 CompanyNumber = companies_numbers[i],
+                                 Error_Time = Sys.time(),
+                                 stringsAsFactors = FALSE)
+
+        }
+      )
 
       i = i + 1
       next()
 
-    }else if(results_all$status_code == 429){
+    }else if(results_all$status_code == 429 | results_all$status_code == 403){
 
       if(current_key_position < total_keys){
         current_key_position = current_key_position + 1
